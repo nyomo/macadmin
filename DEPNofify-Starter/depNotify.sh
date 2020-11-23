@@ -148,8 +148,9 @@ TRIGGER="event"
 #########################################################################################
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
+# ここにセットアップで使うJamfProのポリシーを書く(jamf policy -event イベント名 で呼び出せる奴)
   POLICY_ARRAY=(
-    "プリンタの設定,adobeReader"
+    "プリンタの設定,PrinterSetup"
     "Google Chromeのインストール,chrome"
   )
 
