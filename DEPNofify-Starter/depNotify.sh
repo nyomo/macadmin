@@ -740,8 +740,9 @@ TRIGGER="event"
   fi
 
 # Adding an alert prompt to let admins know that the script is in testing mode
-# 本来はTESTING_MODEの場合ポリシーなどは実行されない警告が出るが、デモ画面録画に邪魔だったので出さない事にした
-  if [ "$TESTING_MODE" != true ]; then
+# 本来はTESTING_MODEの場合ポリシーなどは実行されない警告が出るが、
+# デモ画面録画に邪魔だったのでDEMO_MODEがtrueなら警告を出さない事にした
+  if [ "$TESTING_MODE" = true ] && [ "$DEMO_MODE" != true ]; then
     echo "Command: Alert: DEP Notify is in TESTING_MODE. Script will not run Policies or other commands that make change to this computer."  >> "$DEP_NOTIFY_LOG"
   fi
 
