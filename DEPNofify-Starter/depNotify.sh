@@ -198,6 +198,7 @@ TRIGGER="event"
 
   # EULA Subtitle
     EULA_SUBTITLE="Please agree to the following terms and conditions to start configuration of this Mac" 
+
   # Path to the EULA file you would like the user to read and agree to. It is
   # best to package this up with Composer or another tool and deliver it to a
   # shared area like /Users/Shared/
