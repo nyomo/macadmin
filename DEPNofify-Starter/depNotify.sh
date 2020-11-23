@@ -801,6 +801,7 @@ TRIGGER="event"
     if [ "$TESTING_MODE" = true ]; then
       sleep 10
     elif [ "$TESTING_MODE" = false ]; then
+# Jamf Proが無い場合ここを工夫してスクリプトの呼出に変更すると良さそう
       "$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
   done
