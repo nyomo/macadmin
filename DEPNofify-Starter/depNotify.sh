@@ -208,6 +208,7 @@ TRIGGER="event"
 # Registration Variables to Modify
 #########################################################################################
 # Registration window configuration
+# PC名やAssetTagの入力を促すUIを利用する
   REGISTRATION_ENABLED=true # Set variable to true or false
 
   # Registration window title
@@ -222,6 +223,7 @@ TRIGGER="event"
   # The text and pick list sections below will write the following lines out for
   # end users. Use the variables below to configure what the sentence says
   # Ex: Setting Computer Name to macBook0132
+  # REG_TEXT_LABEL_n を設定中 と表示されるようにしてある
     REGISTRATION_BEGIN_WORD=""
     REGISTRATION_MIDDLE_WORD="を設定中"
 
@@ -260,6 +262,7 @@ TRIGGER="event"
           if [ "$TESTING_MODE" = true ]; then
             sleep 10
           else
+# jamf setComputerName では無くコマンドで設定したいのでアレコレ書いている
             "$JAMF_BINARY" setComputerName -name "$REG_TEXT_LABEL_1_VALUE"
             PCNAME="$REG_TEXT_LABEL_1_VALUE"
             echo 'PC名を設定中'
@@ -279,6 +282,7 @@ TRIGGER="event"
 
   # Second Text Field
   #######################################################################################
+  # 今回のデモではコンピュータ名しか設定しないのでREG_TEXT_LABEL_nを設定しない事により入力欄を表示しない
     # Text Field Label
       #REG_TEXT_LABEL_2="Asset Tag"
 
@@ -736,6 +740,7 @@ TRIGGER="event"
   fi
 
 # Adding an alert prompt to let admins know that the script is in testing mode
+# 本来はTESTING_MODEの場合ポリシーなどは実行されない警告が出るが、デモ画面録画に邪魔だったので出さない事にした
   if [ "$TESTING_MODE" != true ]; then
     echo "Command: Alert: DEP Notify is in TESTING_MODE. Script will not run Policies or other commands that make change to this computer."  >> "$DEP_NOTIFY_LOG"
   fi
