@@ -51,7 +51,7 @@
 # If this variable is left blank, the generic image will appear. If using custom Self
 # Service branding, please see the Customized Self Service Branding area below
 # DEPNotifyをインストールした後でここにアイコン画像をコピーしておく必要がある
-  BANNER_IMAGE_PATH="/var/tmp/nico400x400.jpg"
+  BANNER_IMAGE_PATH="/var/tmp/DEPNotifyLogo.png"
 
 # Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
   YOUR_ORG_NAME_HERE="nyomoko world"
