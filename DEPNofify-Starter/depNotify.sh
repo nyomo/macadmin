@@ -162,7 +162,8 @@ TRIGGER="event"
 # Only recommended if you are using fullscreen mode and have a logout taking place at
 # the end of configuration (like for FileVault). Some folks may use this in workflows
 # where IT staff are the primary people setting up the device. The device will be
-# allowed to sleep again once the DEPNotify app is quit as caffeinate is looking # at DEPNotify's process ID.
+# allowed to sleep again once the DEPNotify app is quit as caffeinate is looking
+# at DEPNotify's process ID.
   NO_SLEEP=false
 
 #########################################################################################
