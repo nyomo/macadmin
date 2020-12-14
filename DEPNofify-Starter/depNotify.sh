@@ -50,10 +50,11 @@
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear. If using custom Self
 # Service branding, please see the Customized Self Service Branding area below
-  BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+# DEPNotifyをインストールした後でここにアイコン画像をコピーしておく必要がある
+  BANNER_IMAGE_PATH="/var/tmp/DEPNotifyLogo.png"
 
 # Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
-  YOUR_ORG_NAME_HERE="Organization"
+  YOUR_ORG_NAME_HERE="nyomoko world"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
@@ -62,13 +63,13 @@
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-  MAIN_TEXT='Thanks for choosing a Mac at '$YOUR_ORG_NAME_HERE'! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+  MAIN_TEXT='このMacは '$YOUR_ORG_NAME_HERE' で利用するためのセットアップが行われます。インターネットの回線速度にもよりますがセットアップ完了まで20分ほどかかります。'
 
 # Initial Start Status text that shows as things are firing up
   INITAL_START_STATUS="Initial Configuration Starting..."
 
 # Text that will display in the progress bar
-  INSTALL_COMPLETE_TEXT="Configuration Complete!"
+  INSTALL_COMPLETE_TEXT="セットアップが完了しました"
 
 # Complete messaging to the end user can ether be a button at the bottom of the
 # app with a modification to the main window text or a dropdown alert box. Default
@@ -87,8 +88,8 @@
   # Option for dropdown alert box
     COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
   # Options if not using dropdown alert box
-    COMPLETE_MAIN_TEXT='Your Mac is now finished with initial setup and configuration.'
-    COMPLETE_BUTTON_TEXT="Get Started!"
+    COMPLETE_MAIN_TEXT='完了ボタン押すと使い始めることができます！'
+    COMPLETE_BUTTON_TEXT="完了"
 
 #########################################################################################
 # Plist Configuration
@@ -147,17 +148,10 @@ TRIGGER="event"
 #########################################################################################
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
+# ここにセットアップで使うJamfProのポリシーを書く(jamf policy -event イベント名 で呼び出せる奴)
   POLICY_ARRAY=(
-    "Installing Adobe Creative Cloud,adobeCC"
-    "Installing Adobe Reader,adobeReader"
-    "Installing Chrome,chrome"
-    "Installing CrashPlan,crashplan"
-    "Installing Firefox,firefox"
-    "Installing Java,java"
-    "Installing NoMAD,nomad"
-    "Installing Office,msOffice"
-    "Installing Webex,webex"
-    "Installing Critical Updates,updateSoftware"
+    "プリンタの設定,INSTALL_PRINTER"
+    "Google Chromeのインストール,INSTALL_CHROME"
   )
 
 #########################################################################################
@@ -214,22 +208,24 @@ TRIGGER="event"
 # Registration Variables to Modify
 #########################################################################################
 # Registration window configuration
-  REGISTRATION_ENABLED=false # Set variable to true or false
+# PC名やAssetTagの入力を促すUIを利用する
+  REGISTRATION_ENABLED=true # Set variable to true or false
 
   # Registration window title
-    REGISTRATION_TITLE="Register Mac at Organization"
+    REGISTRATION_TITLE="macのコンピュータ名を登録してください"
 
   # Registration status bar text
-    REGISTRATION_STATUS="Waiting on completion of computer registration"
+    REGISTRATION_STATUS="このMac固有の設定を登録してください"
 
   # Registration window submit or finish button text
-    REGISTRATION_BUTTON="Register Your Mac"
+    REGISTRATION_BUTTON="登録"
 
   # The text and pick list sections below will write the following lines out for
   # end users. Use the variables below to configure what the sentence says
   # Ex: Setting Computer Name to macBook0132
-    REGISTRATION_BEGIN_WORD="Setting"
-    REGISTRATION_MIDDLE_WORD="to"
+  # REG_TEXT_LABEL_n を設定中 と表示されるようにしてある
+    REGISTRATION_BEGIN_WORD=""
+    REGISTRATION_MIDDLE_WORD="を設定中"
 
   # Registration window can have up to two text fields. Leaving the text display
   # variable empty will hide the input box. Display text is to the side of the
@@ -240,17 +236,17 @@ TRIGGER="event"
   # First Text Field
   #######################################################################################
     # Text Field Label
-      REG_TEXT_LABEL_1="Computer Name"
+      REG_TEXT_LABEL_1="コンピュータ名"
 
     # Place Holder Text
-      REG_TEXT_LABEL_1_PLACEHOLDER="macBook0123"
+      REG_TEXT_LABEL_1_PLACEHOLDER="NYOMACxxx"
 
     # Optional flag for making the field an optional input for end user
       REG_TEXT_LABEL_1_OPTIONAL="false" # Set variable to true or false
 
     # Help Bubble for Input. If title left blank, this will not appear
-      REG_TEXT_LABEL_1_HELP_TITLE="Computer Name Field"
-      REG_TEXT_LABEL_1_HELP_TEXT="This field is sets the name of your new Mac to what is in the Computer Name box. This is important for inventory purposes."
+      REG_TEXT_LABEL_1_HELP_TITLE="Computer Name"
+      REG_TEXT_LABEL_1_HELP_TEXT="指定されたComputerNameを入力してください"
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -266,7 +262,19 @@ TRIGGER="event"
           if [ "$TESTING_MODE" = true ]; then
             sleep 10
           else
+# jamf setComputerName では無くコマンドで設定したいのでアレコレ書いている
             "$JAMF_BINARY" setComputerName -name "$REG_TEXT_LABEL_1_VALUE"
+            PCNAME="$REG_TEXT_LABEL_1_VALUE"
+            echo 'PC名を設定中'
+            dscacheutil -flushcache
+            scutil --set HostName ${PCNAME}
+            scutil --set ComputerName ${PCNAME}
+            scutil --set LocalHostName ${PCNAME}
+            dscacheutil -flushcache
+            
+            echo “NetBIOS Setting”
+            networksetup -setcomputername ${PCNAME}
+            defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string ${PC_NAME}
             sleep 5
           fi
         fi
@@ -274,8 +282,9 @@ TRIGGER="event"
 
   # Second Text Field
   #######################################################################################
+  # 今回のデモではコンピュータ名しか設定しないのでREG_TEXT_LABEL_nを設定しない事により入力欄を表示しない
     # Text Field Label
-      REG_TEXT_LABEL_2="Asset Tag"
+      #REG_TEXT_LABEL_2="Asset Tag"
 
     # Place Holder Text
       REG_TEXT_LABEL_2_PLACEHOLDER="81926392"
@@ -309,7 +318,7 @@ TRIGGER="event"
   # Popup 1
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_1="Building"
+      #REG_POPUP_LABEL_1="Building"
 
     # Array of options for the user to select
       REG_POPUP_LABEL_1_OPTIONS=(
@@ -338,7 +347,7 @@ TRIGGER="event"
   # Popup 2
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_2="Department"
+      #REG_POPUP_LABEL_2="Department"
 
     # Array of options for the user to select
       REG_POPUP_LABEL_2_OPTIONS=(
@@ -731,7 +740,9 @@ TRIGGER="event"
   fi
 
 # Adding an alert prompt to let admins know that the script is in testing mode
-  if [ "$TESTING_MODE" = true ]; then
+# 本来はTESTING_MODEの場合ポリシーなどは実行されない警告が出るが、
+# デモ画面録画に邪魔だったのでDEMO_MODEがtrueなら警告を出さない事にした
+  if [ "$TESTING_MODE" = true ] && [ "$DEMO_MODE" != true ]; then
     echo "Command: Alert: DEP Notify is in TESTING_MODE. Script will not run Policies or other commands that make change to this computer."  >> "$DEP_NOTIFY_LOG"
   fi
 
@@ -790,6 +801,7 @@ TRIGGER="event"
     if [ "$TESTING_MODE" = true ]; then
       sleep 10
     elif [ "$TESTING_MODE" = false ]; then
+# Jamf Proが無い場合ここを工夫してスクリプトの呼出に変更すると良さそう
       "$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
   done
